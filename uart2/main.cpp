@@ -2,42 +2,19 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdint.h>
+#include "lib/Modbus.h"
 
-void USART_Trans(uint8_t data[], uint16_t size);
+Modbus master(0x11);
 
+enum param {
+	PIN_STATE,
+	VERSION,
+	CONFIGURATION = 0x03
+};
+
+uint16_t storage[100] = { 0 };
 uint8_t RX_UART1[100] = {0};
 volatile uint16_t counter = 0;
-uint8_t crc1[2] = {0};
-uint16_t CRC = 0;
-
-uint16_t crc_16(uint8_t *buffer, uint16_t buffer_size)
-{
-	uint8_t temp = 0;
-	uint16_t crc = 0xFFFF;
-
-	for(uint16_t byte = 0; byte < buffer_size; byte++)
-	{
-		crc = crc ^ buffer[byte];
-
-		for(uint8_t j = 0; j < 8; j++)
-		{
-			temp = crc & 0x0001;
-			crc = crc >> 1;
-
-			if(temp)
-			{
-				crc = crc ^ 0xA001;
-			}
-		}
-	}
-
-	temp = crc & 0x00FF;
-	crc = (crc >> 8) | (temp << 8);
-
-	return crc;
-}
-
-
 
 void USART_Trans(uint8_t data[], uint16_t size)
 {
@@ -64,10 +41,10 @@ ISR(USART_RX_vect)
 ISR(TIMER0_OVF_vect)
 {   UCSR0B &=  ~(1 << RXCIE0);
 	TIMSK0 &= ~(1 << TOIE0);
-	CRC = crc_16(RX_UART1, counter);
-	crc1[0] = (uint8_t)(CRC >> 8);
-	crc1[1] = (uint8_t)(CRC & 0x00FF);
-	USART_Trans(crc1, 2);
+	uint8_t TX_UART1[100] = {0};
+	uint16_t m;
+	master.parsing(RX_UART1, TX_UART1, storage, counter, m);
+	USART_Trans(TX_UART1, m);
 	UCSR0B |= 1 << RXCIE0;
 	counter = 0;
 }
@@ -83,6 +60,11 @@ int main(void)
 	
 	TCCR0B = 1 << CS01 | 1 << CS00;
 	TCNT0 = 56;
+	
+	storage[PIN_STATE] = 300;
+	storage[VERSION] = 345;
+	storage[VERSION + 1] = 654;
+	storage[CONFIGURATION] = 3;
 	
 	sei();
 	
