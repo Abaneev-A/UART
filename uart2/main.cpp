@@ -20,6 +20,7 @@ uint16_t storage[100] = {0};
 uint8_t RX_UART1[100] = {0};
 volatile uint16_t counter = 0;
 volatile uint16_t count = 0;
+unsigned char pwm_state = 0;
 
 void USART_Trans(uint8_t data[], uint16_t size)
 {
@@ -73,6 +74,32 @@ ISR(TIMER2_OVF_vect)
     TCNT2 = 56;
 }
 
+ISR(TIMER1_OVF_vect)
+{
+    
+    if (pwm_state==0)
+    {
+        OCR1BL++;
+        
+        if (OCR1BL>254)
+        {
+            pwm_state = 1;
+        }
+    }
+
+    if (pwm_state==1)
+    {
+        OCR1BL--;
+
+        if (OCR1BL<1)
+        {
+            pwm_state = 0;
+        }
+    }
+    
+    TCNT1 = 56;
+}
+
 
 
 int main(void)
@@ -87,25 +114,34 @@ int main(void)
     // установки для 1 светодиода
     
     DDRC = 0b00011111;
-    TCCR2B = 1 << CS21;
+    TCCR2B |= 1 << CS21;
     TCNT2 = 56;
     
     // установки для 3 светодиода
     
-    DDRB = 1 << DDB1;
+    DDRB |= 1 << DDB1;
     
-    TCCR1A = 1 << WGM10 | 1 <<  COM1A1;
+    TCCR1A |= 1 << WGM10 | 1 <<  COM1A1 | 1 << COM1B1;
 
-    TCCR1B = 1 << CS10 | 1 << CS12 | 1 << WGM12;
+    TCCR1B |= 1 << CS10 | 1 << CS12 | 1 << WGM12;
     
+    // установки для 4 светодиода
+    
+    DDRB |= 1 << DDB2;
+    
+    TCCR1A |= 1 << COM1B1;
+    
+    TCNT1 = 56;
+    
+    OCR1BL = 0;
     /////////////////////////////////
           
     storage[POWER_1] = 1;
     storage[FREQ_1] = 5000;
-    storage[POWER_2] = 0;
-    storage[POWER_3] = 0;
-    storage[PWM_3] = 0;
-    storage[POWER_4] = 0;
+    storage[POWER_2] = 1;
+    storage[POWER_3] = 1;
+    storage[PWM_3] = 100;
+    storage[POWER_4] = 1;
     storage[PWM_4] = 0;
     
     sei();
@@ -122,8 +158,8 @@ int main(void)
         if(storage[POWER_3] == 0) DDRB &= ~(1 << DDB1);
         OCR1AL = storage[PWM_3];
         
-        //if(storage[POWER_4] == 1) PORTC |= 1 << PORTC2;
-        //if(storage[POWER_4] == 0) PORTC &= ~(1 << PORTC2);      
+        if(storage[POWER_4] == 1) DDRB |= 1 << DDB2;
+        if(storage[POWER_4] == 0) DDRB &= ~(1 << DDB2);      
     }
 }
 
