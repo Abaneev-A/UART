@@ -2,9 +2,9 @@
 #include <stdint.h>
 //#include <iostream>
 
-#define NUMBER_REG 4
-#define MAX_REG_ADR 3
-#define MAX_NUMBER 1000
+#define NUMBER_REG 5
+#define MAX_REG_ADR 4
+#define MAX_NUMBER 32000
 
 class Modbus
 {

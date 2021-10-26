@@ -1,4 +1,4 @@
-﻿#define F_CPU 16000000UL
+﻿#define F_CPU 16000000L
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdint.h>
@@ -7,14 +7,19 @@
 Modbus master(0x11);
 
 enum param {
-    PIN_STATE,
-    VERSION,
-    CONFIGURATION = 0x03
+    POWER_1,
+    FREQ_1,
+    POWER_2,
+    POWER_3,
+    PWM_3,
+    POWER_4,
+    PWM_4
 };
 
-uint16_t storage[100] = { 0 };
+uint16_t storage[100] = {0};
 uint8_t RX_UART1[100] = {0};
 volatile uint16_t counter = 0;
+volatile uint16_t count = 0;
 
 void USART_Trans(uint8_t data[], uint16_t size)
 {
@@ -39,7 +44,7 @@ ISR(USART_RX_vect)
 }
 
 ISR(TIMER0_OVF_vect)
-{   UCSR0B &=  ~(1 << RXCIE0);
+{   UCSR0B &= ~(1 << RXCIE0);
     TIMSK0 &= ~(1 << TOIE0);
     uint8_t TX_UART1[100] = {0};
     uint16_t m;
@@ -49,6 +54,24 @@ ISR(TIMER0_OVF_vect)
     counter = 0;
 }
 
+ISR(TIMER2_OVF_vect)
+{
+    
+    count++;
+    if (count >= storage[FREQ_1]) {
+        if ((PINC & (1 << PINC0)) > 0)
+        {
+            PORTC &= ~(1 << PORTC0);
+        } else
+        {
+            PORTC = 1 << PORTC0;
+        }
+
+        count = 0;
+    }
+    
+    TCNT2 = 56;
+}
 
 
 
@@ -61,15 +84,46 @@ int main(void)
     TCCR0B = 1 << CS01 | 1 << CS00;
     TCNT0 = 56;
     
-    storage[PIN_STATE] = 300;
-    storage[VERSION] = 345;
-    storage[VERSION + 1] = 654;
-    storage[CONFIGURATION] = 3;
+    // установки для 1 светодиода
+    
+    DDRC = 0b00011111;
+    TCCR2B = 1 << CS21;
+    TCNT2 = 56;
+    
+    // установки для 3 светодиода
+    
+    DDRB = 1 << DDB1;
+    
+    TCCR1A = 1 << WGM10 | 1 <<  COM1A1;
+
+    TCCR1B = 1 << CS10 | 1 << CS12 | 1 << WGM12;
+    
+    /////////////////////////////////
+          
+    storage[POWER_1] = 0;
+    storage[FREQ_1] = 5000;
+    storage[POWER_2] = 0;
+    storage[POWER_3] = 0;
+    storage[PWM_3] = 0;
+    storage[POWER_4] = 0;
+    storage[PWM_4] = 0;
     
     sei();
     
     while (1)
     {
+        if(storage[POWER_1] == 1) TIMSK2 = 1 << TOIE2;
+        if(storage[POWER_1] == 0) {TIMSK2 &= ~(1 << TOIE2); PORTC &= ~(1 << PORTC0);}
+        
+        if(storage[POWER_2] == 1) PORTC |= 1 << PORTC1;
+        if(storage[POWER_2] == 0) PORTC &= ~(1 << PORTC1);
+        
+        if(storage[POWER_3] == 1) DDRB |= 1 << DDB1;
+        if(storage[POWER_3] == 0) DDRB &= ~(1 << DDB1);
+        OCR1AL = storage[PWM_3];
+        
+        //if(storage[POWER_4] == 1) PORTC |= 1 << PORTC2;
+        //if(storage[POWER_4] == 0) PORTC &= ~(1 << PORTC2);      
     }
 }
 
