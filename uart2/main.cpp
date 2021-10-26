@@ -64,7 +64,7 @@ ISR(TIMER2_OVF_vect)
             PORTC &= ~(1 << PORTC0);
         } else
         {
-            PORTC = 1 << PORTC0;
+            PORTC |= 1 << PORTC0;
         }
 
         count = 0;
@@ -100,7 +100,7 @@ int main(void)
     
     /////////////////////////////////
           
-    storage[POWER_1] = 0;
+    storage[POWER_1] = 1;
     storage[FREQ_1] = 5000;
     storage[POWER_2] = 0;
     storage[POWER_3] = 0;
@@ -112,7 +112,7 @@ int main(void)
     
     while (1)
     {
-        if(storage[POWER_1] == 1) TIMSK2 = 1 << TOIE2;
+        if(storage[POWER_1] == 1) TIMSK2 |= 1 << TOIE2;
         if(storage[POWER_1] == 0) {TIMSK2 &= ~(1 << TOIE2); PORTC &= ~(1 << PORTC0);}
         
         if(storage[POWER_2] == 1) PORTC |= 1 << PORTC1;
