@@ -101,6 +101,11 @@ ISR(TIMER1_OVF_vect)
 
 int main(void)
 {
+    uint8_t flag1 = 0;
+    uint8_t flag2 = 0;
+    uint8_t flag3 = 0;
+    uint8_t flag4 = 0;
+    
     UBRR0L = 0x10;
     UCSR0A = 0x02;
     UCSR0B = 1 <<  RXEN0 | 1 <<  TXEN0 | 1 << RXCIE0;
@@ -116,7 +121,7 @@ int main(void)
     
     // установки для 3 светодиода
     
-    DDRB |= 1 << DDB1;
+    //DDRB |= 1 << DDB1;
     
     TCCR1A |= 1 << WGM10 | 1 <<  COM1A1;
 
@@ -124,7 +129,7 @@ int main(void)
     
     // установки для 4 светодиода
     
-    DDRB |= 1 << DDB2;
+    //DDRB |= 1 << DDB2;
     
     TCCR1A |= 1 << COM1B1;
     
@@ -145,18 +150,18 @@ int main(void)
     
     while (1)
     {
-        if(storage[POWER_1] == 1) TIMSK2 |= 1 << TOIE2;
-        if(storage[POWER_1] == 0) {TIMSK2 &= ~(1 << TOIE2); PORTC &= ~(1 << PORTC0);}
+        if(storage[POWER_1] == 1 && flag1 == 0) {TIMSK2 |= 1 << TOIE2; flag1 = 1;}
+        if(storage[POWER_1] == 0 && flag1 == 1) {TIMSK2 &= ~(1 << TOIE2); PORTC &= ~(1 << PORTC0); flag1 = 0;}
         
-        if(storage[POWER_2] == 1) PORTC |= 1 << PORTC1;
-        if(storage[POWER_2] == 0) PORTC &= ~(1 << PORTC1);
+        if(storage[POWER_2] == 1 && flag2 == 0) {PORTC |= 1 << PORTC1; flag2 = 1;}
+        if(storage[POWER_2] == 0 && flag2 == 1) {PORTC &= ~(1 << PORTC1); flag2 = 0;}
         
-        if(storage[POWER_3] == 1) DDRB |= 1 << DDB1;
-        if(storage[POWER_3] == 0) DDRB &= ~(1 << DDB1);
+        if(storage[POWER_3] == 1 && flag3 == 0) {DDRB |= 1 << DDB1; flag3 = 1;}
+        if(storage[POWER_3] == 0 && flag3 == 1) {DDRB &= ~(1 << DDB1); flag3 = 0;}
         OCR1AL = storage[PWM_3];
         
-        if(storage[POWER_4] == 1) DDRB |= 1 << DDB2;
-        if(storage[POWER_4] == 0) DDRB &= ~(1 << DDB2);  
+        if(storage[POWER_4] == 1 && flag4 == 0) {DDRB |= 1 << DDB2; flag4 = 1;}
+        if(storage[POWER_4] == 0 && flag4 == 1) {DDRB &= ~(1 << DDB2); flag4 = 0;} 
             
     }
 }
