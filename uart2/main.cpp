@@ -133,13 +133,13 @@ int main(void)
     OCR1BL = 0;
     /////////////////////////////////
           
-    storage[POWER_1] = 1;
+    storage[POWER_1] = 0;
     storage[FREQ_1] = 5000;
-    storage[POWER_2] = 1;
-    storage[POWER_3] = 1;
+    storage[POWER_2] = 0;
+    storage[POWER_3] = 0;
     storage[PWM_3] = 100;
-    storage[POWER_4] = 1;
-    storage[PWM_4] = 100;
+    storage[POWER_4] = 0;
+    storage[PWM_4] = 200;
     
     sei();
     
