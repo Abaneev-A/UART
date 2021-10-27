@@ -75,29 +75,26 @@ ISR(TIMER2_OVF_vect)
 }
 
 ISR(TIMER1_OVF_vect)
-{
-    
-    if (pwm_state==0)
+{ 
+    if (pwm_state == 0)
     {
         OCR1BL++;
         
-        if (OCR1BL>254)
+        if (OCR1BL > storage[PWM_4])
         {
             pwm_state = 1;
         }
     }
 
-    if (pwm_state==1)
+    if (pwm_state == 1)
     {
         OCR1BL--;
 
-        if (OCR1BL<1)
+        if (OCR1BL < 1)
         {
             pwm_state = 0;
         }
     }
-    
-    TCNT1 = 56;
 }
 
 
@@ -121,9 +118,9 @@ int main(void)
     
     DDRB |= 1 << DDB1;
     
-    TCCR1A |= 1 << WGM10 | 1 <<  COM1A1 | 1 << COM1B1;
+    TCCR1A |= 1 << WGM10 | 1 <<  COM1A1;
 
-    TCCR1B |= 1 << CS10 | 1 << CS12 | 1 << WGM12;
+    TCCR1B |= 1 << CS12 | 1 << WGM12;
     
     // установки для 4 светодиода
     
@@ -131,7 +128,7 @@ int main(void)
     
     TCCR1A |= 1 << COM1B1;
     
-    TCNT1 = 56;
+    TIMSK1 |= 1 << TOIE1;
     
     OCR1BL = 0;
     /////////////////////////////////
@@ -142,7 +139,7 @@ int main(void)
     storage[POWER_3] = 1;
     storage[PWM_3] = 100;
     storage[POWER_4] = 1;
-    storage[PWM_4] = 0;
+    storage[PWM_4] = 100;
     
     sei();
     
@@ -159,7 +156,8 @@ int main(void)
         OCR1AL = storage[PWM_3];
         
         if(storage[POWER_4] == 1) DDRB |= 1 << DDB2;
-        if(storage[POWER_4] == 0) DDRB &= ~(1 << DDB2);      
+        if(storage[POWER_4] == 0) DDRB &= ~(1 << DDB2);  
+            
     }
 }
 
