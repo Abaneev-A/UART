@@ -20,7 +20,7 @@ uint16_t storage[100] = {0};
 uint8_t RX_UART1[100] = {0};
 volatile uint16_t counter = 0;
 volatile uint16_t count = 0;
-unsigned char pwm_state = 0;
+uint8_t pwm_state = 0;
 
 void USART_Trans(uint8_t data[], uint16_t size)
 {
@@ -57,7 +57,6 @@ ISR(TIMER0_OVF_vect)
 
 ISR(TIMER2_OVF_vect)
 {
-    
     count++;
     if (count >= storage[FREQ_1]) {
         if ((PINC & (1 << PINC0)) > 0)
@@ -97,14 +96,12 @@ ISR(TIMER1_OVF_vect)
     }
 }
 
-
-
 int main(void)
 {
-    uint8_t flag1 = 0;
-    uint8_t flag2 = 0;
-    uint8_t flag3 = 0;
-    uint8_t flag4 = 0;
+    uint8_t flag_led1 = 0;
+    uint8_t flag_led2 = 0;
+    uint8_t flag_led3 = 0;
+    uint8_t flag_led4 = 0;
     
     UBRR0L = 0x10;
     UCSR0A = 0x02;
@@ -115,13 +112,11 @@ int main(void)
     
     // установки для 1 светодиода
     
-    DDRC = 0b00011111;
+    DDRC = 0x03;
     TCCR2B |= 1 << CS21;
     TCNT2 = 56;
     
     // установки для 3 светодиода
-    
-    //DDRB |= 1 << DDB1;
     
     TCCR1A |= 1 << WGM10 | 1 <<  COM1A1;
 
@@ -129,14 +124,11 @@ int main(void)
     
     // установки для 4 светодиода
     
-    //DDRB |= 1 << DDB2;
-    
     TCCR1A |= 1 << COM1B1;
     
     TIMSK1 |= 1 << TOIE1;
     
     OCR1BL = 0;
-    /////////////////////////////////
           
     storage[POWER_1] = 0;
     storage[FREQ_1] = 5000;
@@ -150,19 +142,18 @@ int main(void)
     
     while (1)
     {
-        if(storage[POWER_1] == 1 && flag1 == 0) {TIMSK2 |= 1 << TOIE2; flag1 = 1;}
-        if(storage[POWER_1] == 0 && flag1 == 1) {TIMSK2 &= ~(1 << TOIE2); PORTC &= ~(1 << PORTC0); flag1 = 0;}
+        if(storage[POWER_1] == 1 && flag_led1 == 0) {TIMSK2 |= 1 << TOIE2; flag_led1 = 1;}
+        if(storage[POWER_1] == 0 && flag_led1 == 1) {TIMSK2 &= ~(1 << TOIE2); PORTC &= ~(1 << PORTC0); flag_led1 = 0;}
         
-        if(storage[POWER_2] == 1 && flag2 == 0) {PORTC |= 1 << PORTC1; flag2 = 1;}
-        if(storage[POWER_2] == 0 && flag2 == 1) {PORTC &= ~(1 << PORTC1); flag2 = 0;}
+        if(storage[POWER_2] == 1 && flag_led2 == 0) {PORTC |= 1 << PORTC1; flag_led2 = 1;}
+        if(storage[POWER_2] == 0 && flag_led2 == 1) {PORTC &= ~(1 << PORTC1); flag_led2 = 0;}
         
-        if(storage[POWER_3] == 1 && flag3 == 0) {DDRB |= 1 << DDB1; flag3 = 1;}
-        if(storage[POWER_3] == 0 && flag3 == 1) {DDRB &= ~(1 << DDB1); flag3 = 0;}
+        if(storage[POWER_3] == 1 && flag_led3 == 0) {DDRB |= 1 << DDB1; flag_led3 = 1;}
+        if(storage[POWER_3] == 0 && flag_led3 == 1) {DDRB &= ~(1 << DDB1); flag_led3 = 0;}
         OCR1AL = storage[PWM_3];
         
-        if(storage[POWER_4] == 1 && flag4 == 0) {DDRB |= 1 << DDB2; flag4 = 1;}
-        if(storage[POWER_4] == 0 && flag4 == 1) {DDRB &= ~(1 << DDB2); flag4 = 0;} 
-            
+        if(storage[POWER_4] == 1 && flag_led4 == 0) {DDRB |= 1 << DDB2; flag_led4 = 1;}
+        if(storage[POWER_4] == 0 && flag_led4 == 1) {DDRB &= ~(1 << DDB2); flag_led4 = 0;}             
     }
 }
 
