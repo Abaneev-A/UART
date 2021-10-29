@@ -67,13 +67,13 @@ ISR(TIMER0_OVF_vect)
     
     USART_Trans(TX_UART1, m);
     
-    eeprom_update_word ((uint16_t *)EE_POWER_1, storage[POWER_1]);
-    eeprom_update_word ((uint16_t *)EE_FREQ_1, storage[FREQ_1]);
-    eeprom_update_word ((uint16_t *)EE_POWER_2, storage[POWER_2]);
-    eeprom_update_word ((uint16_t *)EE_POWER_3, storage[POWER_3]);
-    eeprom_update_word ((uint16_t *)EE_PWM_3, storage[PWM_3]);
-    eeprom_update_word ((uint16_t *)EE_POWER_4, storage[POWER_4]);
-    eeprom_update_word ((uint16_t *)EE_PWM_4, storage[PWM_4]);
+    eeprom_update_word((uint16_t *)EE_POWER_1, storage[POWER_1]);
+    eeprom_update_word((uint16_t *)EE_FREQ_1, storage[FREQ_1]);
+    eeprom_update_word((uint16_t *)EE_POWER_2, storage[POWER_2]);
+    eeprom_update_word((uint16_t *)EE_POWER_3, storage[POWER_3]);
+    eeprom_update_word((uint16_t *)EE_PWM_3, storage[PWM_3]);
+    eeprom_update_word((uint16_t *)EE_POWER_4, storage[POWER_4]);
+    eeprom_update_word((uint16_t *)EE_PWM_4, storage[PWM_4]);
     
     UCSR0B |= 1 << RXCIE0;
     
@@ -143,13 +143,13 @@ int main(void)
     
     OCR1BL = 0;
           
-    storage[POWER_1] = eeprom_read_word ((const uint16_t *)EE_POWER_1);
-    storage[FREQ_1]  = eeprom_read_word ((const uint16_t *)EE_FREQ_1);
-    storage[POWER_2] = eeprom_read_word ((const uint16_t *)EE_POWER_2);
-    storage[POWER_3] = eeprom_read_word ((const uint16_t *)EE_POWER_3);
-    storage[PWM_3]   = eeprom_read_word ((const uint16_t *)EE_PWM_3);
-    storage[POWER_4] = eeprom_read_word ((const uint16_t *)EE_POWER_4);
-    storage[PWM_4]   = eeprom_read_word ((const uint16_t *)EE_PWM_3);
+    storage[POWER_1] = eeprom_read_word((const uint16_t *)EE_POWER_1);
+    storage[FREQ_1]  = eeprom_read_word((const uint16_t *)EE_FREQ_1);
+    storage[POWER_2] = eeprom_read_word((const uint16_t *)EE_POWER_2);
+    storage[POWER_3] = eeprom_read_word((const uint16_t *)EE_POWER_3);
+    storage[PWM_3]   = eeprom_read_word((const uint16_t *)EE_PWM_3);
+    storage[POWER_4] = eeprom_read_word((const uint16_t *)EE_POWER_4);
+    storage[PWM_4]   = eeprom_read_word((const uint16_t *)EE_PWM_3);
     
     sei();
     
