@@ -2,6 +2,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <stdint.h>
+#include <avr/eeprom.h>
 #include "lib/Modbus.h"
 
 Modbus master(0x11);
@@ -51,6 +52,13 @@ ISR(TIMER0_OVF_vect)
     uint16_t m;
     master.parsing(RX_UART1, TX_UART1, storage, counter, m);
     USART_Trans(TX_UART1, m);
+    eeprom_update_word ((uint16_t *)0, storage[POWER_1]);
+    eeprom_update_word ((uint16_t *)2, storage[FREQ_1]);
+    eeprom_update_word ((uint16_t *)4, storage[POWER_2]);
+    eeprom_update_word ((uint16_t *)6, storage[POWER_3]);
+    eeprom_update_word ((uint16_t *)8, storage[PWM_3]);
+    eeprom_update_word ((uint16_t *)10, storage[POWER_4]);
+    eeprom_update_word ((uint16_t *)12, storage[PWM_4]);
     UCSR0B |= 1 << RXCIE0;
     counter = 0;
 }
@@ -130,13 +138,13 @@ int main(void)
     
     OCR1BL = 0;
           
-    storage[POWER_1] = 0;
-    storage[FREQ_1] = 5000;
-    storage[POWER_2] = 0;
-    storage[POWER_3] = 0;
-    storage[PWM_3] = 100;
-    storage[POWER_4] = 0;
-    storage[PWM_4] = 200;
+    storage[POWER_1] = eeprom_read_word ((const uint16_t *)0);
+    storage[FREQ_1] = eeprom_read_word ((const uint16_t *)2);
+    storage[POWER_2] = eeprom_read_word ((const uint16_t *)4);
+    storage[POWER_3] = eeprom_read_word ((const uint16_t *)6);
+    storage[PWM_3] = eeprom_read_word ((const uint16_t *)8);
+    storage[POWER_4] = eeprom_read_word ((const uint16_t *)10);
+    storage[PWM_4] = eeprom_read_word ((const uint16_t *)12);
     
     sei();
     
