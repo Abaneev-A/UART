@@ -97,20 +97,14 @@ ISR(TIMER1_OVF_vect)
     {
         OCR1BL++;
         
-        if (OCR1BL > storage[PWM_4])
-        {
-            pwm_state = 1;
-        }
+        if (OCR1BL > storage[PWM_4]) pwm_state = 1;
     }
 
     if (pwm_state == 1)
     {
         OCR1BL--;
 
-        if (OCR1BL < 1)
-        {
-            pwm_state = 0;
-        }
+        if (OCR1BL < 1) pwm_state = 0;
     }
 }
 
