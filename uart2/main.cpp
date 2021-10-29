@@ -48,9 +48,7 @@ ISR(USART_RX_vect)
     RX_UART1[counter] = UDR0;
     counter++;
     TCNT0 = 56;
-    if ((TIMSK0 & (1 << TOIE0)) == 0) {
-        TIMSK0 = 1 << TOIE0;
-    }
+    if ((TIMSK0 & (1 << TOIE0)) == 0) TIMSK0 = 1 << TOIE0;
     
     if (counter == 100) counter = 0;
 }
@@ -76,14 +74,10 @@ ISR(TIMER0_OVF_vect)
 ISR(TIMER2_OVF_vect)
 {
     count++;
-    if (count >= storage[FREQ_1]) {
-        if ((PINC & (1 << PINC0)) > 0)
-        {
-            PORTC &= ~(1 << PORTC0);
-        } else
-        {
-            PORTC |= 1 << PORTC0;
-        }
+    if (count >= storage[FREQ_1])
+    {
+        if ((PINC & (1 << PINC0)) > 0) PORTC &= ~(1 << PORTC0);
+        else PORTC |= 1 << PORTC0;
 
         count = 0;
     }
