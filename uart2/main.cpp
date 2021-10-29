@@ -19,18 +19,18 @@ enum param {
 
 enum EE_param {
     EE_POWER_1,
-    EE_FREQ_1 = 2,
+    EE_FREQ_1  = 2,
     EE_POWER_2 = 4,
     EE_POWER_3 = 6,
-    EE_PWM_3 = 8,
+    EE_PWM_3   = 8,
     EE_POWER_4 = 10,
-    EE_PWM_4 = 12
+    EE_PWM_4   = 12
 };
 
 uint16_t storage[100] = {0};
 uint8_t RX_UART1[100] = {0};
 volatile uint16_t counter = 0;
-volatile uint16_t count = 0;
+volatile uint16_t count   = 0;
 uint8_t pwm_state = 0;
 
 void USART_Trans(uint8_t data[], uint16_t size)
@@ -45,9 +45,12 @@ void USART_Trans(uint8_t data[], uint16_t size)
 ISR(USART_RX_vect)
 {
     TIFR0 = 0x01; //!!!!
+    
     RX_UART1[counter] = UDR0;
     counter++;
+    
     TCNT0 = 56;
+    
     if ((TIMSK0 & (1 << TOIE0)) == 0) TIMSK0 = 1 << TOIE0;
     
     if (counter == 100) counter = 0;
@@ -56,10 +59,14 @@ ISR(USART_RX_vect)
 ISR(TIMER0_OVF_vect)
 {   UCSR0B &= ~(1 << RXCIE0);
     TIMSK0 &= ~(1 << TOIE0);
+    
     uint8_t TX_UART1[100] = {0};
     uint16_t m;
+    
     master.parsing(RX_UART1, TX_UART1, storage, counter, m);
+    
     USART_Trans(TX_UART1, m);
+    
     eeprom_update_word ((uint16_t *)EE_POWER_1, storage[POWER_1]);
     eeprom_update_word ((uint16_t *)EE_FREQ_1, storage[FREQ_1]);
     eeprom_update_word ((uint16_t *)EE_POWER_2, storage[POWER_2]);
@@ -67,7 +74,9 @@ ISR(TIMER0_OVF_vect)
     eeprom_update_word ((uint16_t *)EE_PWM_3, storage[PWM_3]);
     eeprom_update_word ((uint16_t *)EE_POWER_4, storage[POWER_4]);
     eeprom_update_word ((uint16_t *)EE_PWM_4, storage[PWM_4]);
+    
     UCSR0B |= 1 << RXCIE0;
+    
     counter = 0;
 }
 
@@ -125,24 +134,22 @@ int main(void)
     // установки для 3 светодиода
     
     TCCR1A |= 1 << WGM10 | 1 <<  COM1A1;
-
     TCCR1B |= 1 << CS12 | 1 << WGM12;
     
     // установки для 4 светодиода
     
-    TCCR1A |= 1 << COM1B1;
-    
+    TCCR1A |= 1 << COM1B1;  
     TIMSK1 |= 1 << TOIE1;
     
     OCR1BL = 0;
           
     storage[POWER_1] = eeprom_read_word ((const uint16_t *)EE_POWER_1);
-    storage[FREQ_1] = eeprom_read_word ((const uint16_t *)EE_FREQ_1);
+    storage[FREQ_1]  = eeprom_read_word ((const uint16_t *)EE_FREQ_1);
     storage[POWER_2] = eeprom_read_word ((const uint16_t *)EE_POWER_2);
     storage[POWER_3] = eeprom_read_word ((const uint16_t *)EE_POWER_3);
-    storage[PWM_3] = eeprom_read_word ((const uint16_t *)EE_PWM_3);
+    storage[PWM_3]   = eeprom_read_word ((const uint16_t *)EE_PWM_3);
     storage[POWER_4] = eeprom_read_word ((const uint16_t *)EE_POWER_4);
-    storage[PWM_4] = eeprom_read_word ((const uint16_t *)EE_PWM_3);
+    storage[PWM_4]   = eeprom_read_word ((const uint16_t *)EE_PWM_3);
     
     sei();
     
